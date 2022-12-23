@@ -5,7 +5,38 @@
 
 let gistID = "818d8e8a49c121f5fdadb658930916a7";
 
+
+// Keychain key for the GitHub OAuth App client ID
+let CLIENT_ID_KEY = "github.gists.clientId"
+// Keychain key for the GitHub OAuth App client secret
+let CLIENT_SECRET_KEY = "github.gists.clientSecret"
+// Keychain key for the access token
+let ACCESS_TOKEN_KEY = "github.gists.accessToken"
+let apiURL = "https://api.github.com/gists";
+
+let regex = /^https?:\/\/gist\.github\.com\//;
+// prefer saving to iCloud, but if it wasn't enabled, fall back to local
+let fm;
+try {
+	fm = FileManager.iCloud();
+} catch (ex) {
+	fm = FileManager.local();
+}
+
 await downloadGist(gistID);
+
+function apiRequest(url) {
+	let u = apiURL;
+	if (url) u += "/" + url;
+	let req = new Request(u);
+	if (Keychain.contains(ACCESS_TOKEN_KEY)) {
+		// we are authorized
+		req.headers = {
+			Authorization: "token " + Keychain.get(ACCESS_TOKEN_KEY)
+		};
+	}
+	return req;
+}
 
 async function downloadGist(gistID) {
 	// Get the data in the Gist
