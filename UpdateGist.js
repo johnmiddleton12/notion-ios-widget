@@ -3,7 +3,7 @@
 // icon-color: yellow; icon-glyph: download;
 // share-sheet-inputs: url;
 
-let gistID = "818d8e8a49c121f5fdadb658930916a7";
+let gistID = "c15ecdc2826d105c04f93aa05facc136";
 
 
 // Keychain key for the GitHub OAuth App client ID
