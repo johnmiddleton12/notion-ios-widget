@@ -2,17 +2,60 @@
 // These must be at the very top of the file. Do not edit.
 // icon-color: pink; icon-glyph: magic;
 
-const { NOTION_KEY, NOTION_DATABASE_ID } = require('./env/config.js');
+const { NOTION_KEY, NOTION_DATABASE_ID } = importModule('/env/config.js');
 
-console.log(NOTION_KEY, NOTION_DATABASE_ID);
+console.log(NOTION_KEY);
+console.log(NOTION_DATABASE_ID);
 
-let message = 'Helloooo Woooooorld!'
+// create a new Request object
+
+let baseURI = "https://api.notion.com/v1/databases/";
+let queryURI = baseURI + NOTION_DATABASE_ID + "/query";
+
+let req = new Request(queryURI);
+
+// set the method
+req.method = "POST";
+
+// set the headers
+req.headers = {
+    Authorization: `Bearer ${NOTION_KEY}`,
+    "Content-Type": "application/json",
+    "Notion-Version": "2022-02-22",
+};
+
+// set the body
+req.body = JSON.stringify({
+    filter: {
+            "property": "Tags",
+            "multi_select": {
+                contains: "WORK",
+            },
+    },
+    // sort by time created
+    sorts: [
+        {
+            timestamp: "created_time",
+            direction: "descending",
+        },
+    ],
+});
+
+// send the request
+let data = await req.loadJSON();
+let results = data.results;
+
+let page1 = results[0];
+let message = page1.properties['Task name'].title[0].plain_text;
+
 let param = config.widgetParameter
 if (param != null && param.length > 0) {
     message = param
 }
 
 const widget = new ListWidget()
+
+widget.url = page1.url
 
 widget.addSpacer(4)
 
