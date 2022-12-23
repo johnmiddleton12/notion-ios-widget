@@ -8,5 +8,8 @@
     "@scriptable-ios/eslint-config": "latest",
     "@types/scriptable-ios": "latest",
     "eslint": "latest"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3"
   }
 }
