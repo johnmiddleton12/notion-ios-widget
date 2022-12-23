@@ -12,7 +12,7 @@ async function createWidget(config) {
     const log = config.debug ? console.log.bind(console) : function () {};
     log(JSON.stringify(config, null, 2))
 
-    let message = 'Hello World!'
+    let message = 'Hello Wooorld!'
     let param = config.widgetParameter
     if (param != null && param.length > 0) {
         message = param
