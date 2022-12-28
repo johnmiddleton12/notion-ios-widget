@@ -26,12 +26,15 @@ req.headers = {
 
 // set the body
 req.body = JSON.stringify({
+    page_size: 4,
+    /*
     filter: {
             "property": "Tags",
             "multi_select": {
                 contains: "WORK",
             },
     },
+    */
     // sort by time created
     sorts: [
         {
@@ -45,21 +48,19 @@ req.body = JSON.stringify({
 let data = await req.loadJSON();
 let results = data.results;
 
-let page1 = results[0];
-let message = page1.properties['Task name'].title[0].plain_text;
+let messages = results.map((page) => {
+    return page.properties['Task name'].title[0].plain_text;
+});
 
-let param = config.widgetParameter
-if (param != null && param.length > 0) {
-    message = param
-}
+let urls = results.map((page) => {
+    return page.url;
+});
 
 const widget = new ListWidget()
 
-widget.url = page1.url
+//widget.addSpacer(4)
 
-widget.addSpacer(4)
-
-widget.setPadding(10, 10, 10, 10)
+//widget.setPadding(10, 10, 10, 10)
 
 let row = widget.addStack()
 row.layoutHorizontally()
@@ -67,15 +68,37 @@ row.layoutHorizontally()
 let column = row.addStack()
 column.layoutVertically()
 
-column.addText(message)
-column.addText("Version: development")
+let column2 = row.addStack()
+column2.layoutVertically()
 
-let currentTime = new Date().toLocaleTimeString('de-DE', { hour: "numeric", minute: "numeric" })
+column.spacing = 4
 
-column.addText(currentTime)
+// add tasks 
+for (let i = 0; i < messages.length; i++) {
+    let message = messages[i]
+    let url = urls[i]
+
+    let text = column.addText(message)
+    text.url = url
+    text.font = Font.boldSystemFont(14)
+    text.lineLimit = 1
+    //text.minimumScaleFactor = 0.5
+    text.textColor = Color.white()
+
+    // add a gray line between tasks
+    let line = column.addImage(SFSymbol.named("line.horizontal.3").image)
+
+}
+
+// add plus button
+let plusSymbol = SFSymbol.named("doc.badge.plus")
+let plusImage = column2.addImage(plusSymbol.image)
+plusImage.imageSize = new Size(40, 40)
+plusImage.tintColor = Color.white()
+plusImage.url = "https://www.notion.so/"
 
 if (config.runsInWidget) {
     Script.setWidget(widget)
 } else {
-    widget.presentSmall()
+    widget.presentMedium()
 }

@@ -13,12 +13,15 @@ var options = {
         "Notion-Version": "2022-02-22",
     },
     body: JSON.stringify({
+        page_size: 10,
+        /*
         filter: {
                 "property": "Tags",
                 "multi_select": {
                     contains: "WORK",
                 },
         },
+        */
         // sort by time created
         sorts: [
             {
