@@ -8,15 +8,9 @@ let gistID = "c15ecdc2826d105c04f93aa05facc136";
 let overrideDownload = true;
 let notifyUser = false;
 
-// Keychain key for the GitHub OAuth App client ID
-let CLIENT_ID_KEY = "github.gists.clientId"
-// Keychain key for the GitHub OAuth App client secret
-let CLIENT_SECRET_KEY = "github.gists.clientSecret"
-// Keychain key for the access token
 let ACCESS_TOKEN_KEY = "github.gists.accessToken"
 let apiURL = "https://api.github.com/gists";
 
-let regex = /^https?:\/\/gist\.github\.com\//;
 // prefer saving to iCloud, but if it wasn't enabled, fall back to local
 let fm;
 try {
@@ -24,8 +18,6 @@ try {
 } catch (ex) {
 	fm = FileManager.local();
 }
-
-await downloadGist(gistID);
 
 function apiRequest(url) {
 	let u = apiURL;
@@ -124,3 +116,7 @@ async function downloadGist(gistID) {
 		Notification.removeDelivered([n.identifier]);
 	}
 }
+
+module.exports = {downloadGist, gistID}
+
+await downloadGist(gistID);
