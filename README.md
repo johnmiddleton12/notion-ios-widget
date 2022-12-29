@@ -41,4 +41,5 @@ module.exports = {NOTION_KEY, NOTION_DATABASE_ID}
 ## To-Do
 
 - Add preview 
+- Fix periodic self updating
 - Prettify
