@@ -1,4 +1,4 @@
-# Notion iOS Tasks Widget
+# Notion iOS Tasks Widget :blue_book:
 
 This is a widget made using the [Scriptable](https://scriptable.app/) app for iOS.
 
