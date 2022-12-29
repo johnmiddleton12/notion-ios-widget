@@ -37,3 +37,8 @@ module.exports = {NOTION_KEY, NOTION_DATABASE_ID}
 1. Add a **Medium** sized widget to your home screen from Scriptable
 2. Hold down on the widget and choose the script NotionWidget from the list
 3. Done!
+
+## To-Do
+
+- Add preview 
+- Prettify
