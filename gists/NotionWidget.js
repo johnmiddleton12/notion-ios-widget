@@ -4,7 +4,7 @@
 
 const { NOTION_KEY, NOTION_DATABASE_ID } = importModule('/env/config.js');
 
-const debug = false
+const debug = true 
 
 const updateSelf = async () => {
     // call the KeepGistsUpdated script to update this script
@@ -13,6 +13,7 @@ const updateSelf = async () => {
 }
 
 const createNewPage = async () => {
+
     let req = new Request(`https://api.notion.com/v1/pages`);
     req.method = "POST";
     req.headers = {
@@ -23,6 +24,18 @@ const createNewPage = async () => {
     req.body = JSON.stringify({
         parent: {
             database_id: NOTION_DATABASE_ID,
+        },
+        properties: {
+            "Task name": {
+                title: [
+                    {
+                        text: {
+                            // set content to random string to avoid duplicate page creation
+                            content: Math.random().toString(36).substring(7),
+                        }
+                    }
+                ]
+            }
         },
     })
     let data = await req.loadJSON();
@@ -107,7 +120,7 @@ const createWidget = async () => {
     let plusSymbol = SFSymbol.named("doc.badge.plus")
     let plusImage = plus.addImage(plusSymbol.image)
     plusImage.centerAlignImage()
-    plusImage.imageSize = new Size(30, 30)
+    plusImage.imageSize = new Size(40, 40)
     plusImage.tintColor = Color.white()
     // set the url to a returned request to make a new page in the database
     plusImage.url = await createNewPage();
