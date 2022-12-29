@@ -41,7 +41,7 @@ module.exports = {NOTION_KEY, NOTION_DATABASE_ID}
 ## To-Do
 
 - Add preview 
-- Fix page generation on new page click rather than on script instantiation, url schema to run separate script?
+- Fix page generation on new page click rather than on script instantiation, url schema to run separate script?, WebView and use inject js?
 - Fix periodic self updating
 - Change setup to one self updating file
 - Prettify, fix formatting on small text
