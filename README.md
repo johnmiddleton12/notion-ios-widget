@@ -2,9 +2,9 @@
 
 This is a widget made using the [Scriptable](https://scriptable.app/) app for iOS.
 
-I used to use Google Tasks to keep track of things, but now use Notion - however, they don't have any usable widgets. This is built as a better replacement to the Google Tasks widget.
+I used to use Google Tasks to keep track of things, but now use Notion - however, they don't have any usable widgets. This is built as a better replacement to the Google Tasks widget, to be used with the Notion app.
 
-It displays the 4 most recently added items in a database, along with providing a button to add a new item in that database.
+It displays the 4 most recently added items in a database, along with providing a button to add a new item in that database. Each item links to its corresponding page in the Notion database.
 
 ## Usage
 
