@@ -63,19 +63,31 @@ const widget = new ListWidget()
 //widget.setPadding(10, 10, 10, 10)
 
 let row = widget.addStack()
-row.layoutHorizontally()
+//row.layoutHorizontally()
 
 let column = row.addStack()
 column.layoutVertically()
 
 let column2 = row.addStack()
 column2.layoutVertically()
+column2.centerAlignContent()
 
 column.spacing = 4
 
+// gray line
+let line = new Rect(0, 0, 200, 4)
+let lineView = new DrawContext()
+lineView.opaque = false
+lineView.respectScreenScale = true
+lineView.size = line.size
+lineView.setFillColor(Color.gray())
+lineView.fillRect(line)
+let lineImage = lineView.getImage()
+
 // add tasks 
 for (let i = 0; i < messages.length; i++) {
-    let message = messages[i]
+    // set message to first 30 characters, add ellipsis if longer
+    let message = messages[i].length > 26 ? messages[i].substring(0, 26) + "..." : messages[i]
     let url = urls[i]
 
     let text = column.addText(message)
@@ -86,16 +98,22 @@ for (let i = 0; i < messages.length; i++) {
     text.textColor = Color.white()
 
     // add a gray line between tasks
-    let line = column.addImage(SFSymbol.named("line.horizontal.3").image)
+    let lineImageView = column.addImage(lineImage)
+    lineImageView.centerAlignImage()
+    lineImageView.imageSize = new Size(200, 4)
 
 }
 
 // add plus button
 let plusSymbol = SFSymbol.named("doc.badge.plus")
 let plusImage = column2.addImage(plusSymbol.image)
+plusImage.centerAlignImage()
 plusImage.imageSize = new Size(40, 40)
 plusImage.tintColor = Color.white()
-plusImage.url = "https://www.notion.so/"
+
+// set the url to a request to make a new page in the database
+plusImage.url = "https://api.notion.com/v1/pages"
+
 
 if (config.runsInWidget) {
     Script.setWidget(widget)
