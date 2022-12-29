@@ -41,5 +41,6 @@ module.exports = {NOTION_KEY, NOTION_DATABASE_ID}
 ## To-Do
 
 - Add preview 
+- Fix page generation on new page click rather than on script instantiation
 - Fix periodic self updating
-- Prettify
+- Prettify, fix formatting on small text
