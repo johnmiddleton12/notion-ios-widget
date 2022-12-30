@@ -76,14 +76,13 @@ const createWidget = async (debug) => {
     // MAIN WIDGET
 
     const widget = new ListWidget()
-    //widget.setPadding(0, 0, 0, 0)
-    widget.url = "https://www.notion.so/" + NOTION_DATABASE_ID
 
     // ROW
 
     let row = widget.addStack()
     row.layoutHorizontally()
     row.setPadding(5, 15, 5, 15)
+    row.url = "https://www.notion.so/" + NOTION_DATABASE_ID
 
     // LEFT COLUMN
 
