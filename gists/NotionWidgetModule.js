@@ -81,7 +81,7 @@ const createWidget = async (debug) => {
 
     let row = widget.addStack()
     row.layoutHorizontally()
-    row.setPadding(5, 15, 5, 15)
+    row.setPadding(5, 10, 5, 15)
     row.url = "https://www.notion.so/" + NOTION_DATABASE_ID
 
     // LEFT COLUMN
@@ -158,11 +158,13 @@ const createWidget = async (debug) => {
         })
     }
 
-
     return widget
 }
 
-async function main(debug) {
+async function main() {
+    
+    const debug = false 
+
     let widget = await createWidget(debug);
 
     if (config.runsInWidget) {

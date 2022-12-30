@@ -2,8 +2,6 @@
 // These must be at the very top of the file. Do not edit.
 // icon-color: pink; icon-glyph: magic;
 
-const { NOTION_KEY, NOTION_DATABASE_ID } = importModule('/env/config.js');
-
 const downloadNotionWidget = async () => {
 
     const gistID = "c15ecdc2826d105c04f93aa05facc136";
@@ -25,7 +23,7 @@ const downloadNotionWidget = async () => {
     let files = Object.values(res.files);
 
     // Get the file named "NotionWidget.js"
-    let file = files.find(f => f.filename == "NotionWidget.js");
+    let file = files.find(f => f.filename == "NotionWidgetModule.js");
 
     // Get the contents of the file
     let contents = await file.content;
@@ -40,21 +38,32 @@ const downloadNotionWidget = async () => {
 
 async function main() {
 
-    const debug = true;
-    const widgetDebug = true;
-
     // if NotionWidget.js doesn't exist, or debug is on, download it
     // also download it if the file is older than 1 day
     let fm = FileManager.iCloud();
-    let path = fm.joinPath(fm.documentsDirectory(), "NotionWidget.js");
-    if (!fm.fileExists(path) || debug || (Date.now() - fm.modificationDate(path)) > 86400000) {
-        console.log("Downloading NotionWidget.js");
-        await downloadNotionWidget();
-    }
+    let path = fm.joinPath(fm.documentsDirectory(), "NotionWidgetModule.js");
+
+    try {
+        if (!fm.fileExists(path) || config.runsInApp || (Date.now() - fm.modificationDate(path)) > 86400000) {
+            console.log("Downloading NotionWidgetModule.js");
+            await downloadNotionWidget();
+        }
+    } catch (ex) {
+        
+        console.log("Error downloading NotionWidgetModule.js");
+
+        if (!fm.fileExists(path)) {
+            // display error message in widget
+            let widget = new ListWidget();
+            widget.addText("Error: NotionWidgetModule.js not found");
+            Script.setWidget(widget);
+            Script.complete();
+        } 
+    } 
 
     // run NotionWidget.js
     const notionWidget = importModule('NotionWidgetModule.js');
-    await notionWidget.main(widgetDebug);
+    await notionWidget.main();
 
 }
 
