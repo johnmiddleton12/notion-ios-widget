@@ -14,11 +14,11 @@ First we will setup the widget script and allow it be easily updated.
 
 1. Install the Scriptable App to your iOS device
 2. Navigate to this [Gist](https://gist.github.com/johnmiddleton12/c15ecdc2826d105c04f93aa05facc136) on your iOS device
-3. Go to the Raw view of "KeepGistsUpdated.js"
+3. Go to the Raw view of "NotionWidget.js"
 4. Select All and Copy
-5. Navigate to Scriptable, create a new script, and paste the code from "KeepGistsUpdated.js"
+5. Navigate to Scriptable, create a new script, and paste the code from "NotionWidget.js"
 6. Run that Script
-- This will give you the NotionWidget script, along with another one that will allow you to update it whenever changes are made
+- This will give you the NotionWidget script, which will automatically update periodically 
 ### Notion API Setup
 Next we need to set up the Notion API key and Database IDs
 
