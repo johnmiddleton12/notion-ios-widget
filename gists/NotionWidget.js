@@ -7,13 +7,12 @@ const { NOTION_KEY, NOTION_DATABASE_ID } = importModule('/env/config.js');
 const debug = true 
 
 const updateSelf = async () => {
-    // call the KeepGistsUpdated script to update this script
-    const keepGistsUpdated = importModule('KeepGistsUpdated');
+    // run KeepGistsUpdated.js to update the script
+    const keepGistsUpdated = importModule('KeepGistsUpdatedModule.js');
     await keepGistsUpdated.downloadGist(keepGistsUpdated.gistID);
 }
 
 const createNewPage = async () => {
-
     let req = new Request(`https://api.notion.com/v1/pages`);
     req.method = "POST";
     req.headers = {
@@ -30,8 +29,7 @@ const createNewPage = async () => {
                 title: [
                     {
                         text: {
-                            // set content to random string to avoid duplicate page creation
-                            content: Math.random().toString(36).substring(7),
+                            content: "Hello"
                         }
                     }
                 ]
@@ -86,68 +84,60 @@ const createWidget = async () => {
     // MAIN WIDGET
 
     const widget = new ListWidget()
-    widget.setPadding(0, 0, 0, 0)
+    //widget.setPadding(0, 0, 0, 0)
+    widget.url = "https://www.notion.so/" + NOTION_DATABASE_ID
 
     // ROW
 
     let row = widget.addStack()
     row.layoutHorizontally()
-    row.setPadding(35, 17, 35, 17)
+    row.setPadding(5, 15, 5, 15)
 
     // LEFT COLUMN
 
     let left_column = row.addStack()
     left_column.layoutVertically()
-    if (debug) {
-        left_column.borderWidth = 1
-        left_column.borderColor = Color.white()
-    }
-    //left_column.setPadding(0, 0, 0, 0)
-
-    //row.addSpacer(16)
 
     // add My Tasks header
     let header = left_column.addStack()
     let headerText = header.addText("My Tasks")
     headerText.font = Font.boldSystemFont(18)
     headerText.textColor = Color.white()
-    header.addSpacer(20)
 
-    left_column.addSpacer(80)
+    left_column.addSpacer(75)
 
     // add plus button
     let plus = left_column.addStack()
+    plus.bottomAlignContent()
     let plusSymbol = SFSymbol.named("doc.badge.plus")
     let plusImage = plus.addImage(plusSymbol.image)
     plusImage.centerAlignImage()
     plusImage.imageSize = new Size(40, 40)
     plusImage.tintColor = Color.white()
     // set the url to a returned request to make a new page in the database
-    plusImage.url = await createNewPage();
-    plus.addSpacer(20)
+    // TODO: currently this creates a new page every time the widget is refreshed
+    //plusImage.url = await createNewPage();
 
     // END LEFT COLUMN 
+
+    row.addSpacer(16)
 
     // RIGHT COLUMN
 
     let right_column = row.addStack()
     right_column.layoutVertically()
-    right_column.setPadding(4, 0, 0, 0)
-
-    if (debug) {
-        right_column.borderWidth = 1
-        right_column.borderColor = Color.white()
-    }
+    right_column.setPadding(6, 0, 0, 0)
 
     // add tasks 
+    let tasks = []
     for (let i = 0; i < messages.length; i++) {
         // set message to first 30 characters, add ellipsis if longer
         let message = messages[i].length > 26 ? messages[i].substring(0, 26) + "..." : messages[i]
         let url = urls[i]
 
         let task = right_column.addStack()
+        tasks.push(task)
         let text = task.addText(message)
-        task.addSpacer(20)
         text.url = url
         text.font = Font.systemFont(14)
         text.lineLimit = 1
@@ -161,7 +151,22 @@ const createWidget = async () => {
 
     // END RIGHT COLUMN
 
+    row.addSpacer()
+
     // END ROW
+
+    stacks = [
+        row, left_column, header, plus,
+        right_column, ...tasks
+    ]
+
+    if (debug) {
+        stacks.forEach((stack) => {
+            stack.borderWidth = 1
+            stack.borderColor = Color.white()
+        })
+    }
+
 
     return widget
 }
@@ -176,7 +181,7 @@ async function main() {
     let minute = now.getMinutes();
 
     if (hour % 6 == 0 && minute == 0 || config.runsInApp) {
-        //await updateSelf();
+        await updateSelf();
     }
 
     let widget = await createWidget();
@@ -188,4 +193,6 @@ async function main() {
     }
 }
 
-await main();
+if (config.runsInWidget) {
+    await main();
+}

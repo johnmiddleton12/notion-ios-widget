@@ -3,7 +3,7 @@
 // icon-color: yellow; icon-glyph: download;
 // share-sheet-inputs: url;
 
-let gistID = "c15ecdc2826d105c04f93aa05facc136";
+const gistID = "c15ecdc2826d105c04f93aa05facc136";
 
 let overrideDownload = true;
 let notifyUser = false;
@@ -19,7 +19,7 @@ try {
 	fm = FileManager.local();
 }
 
-function apiRequest(url) {
+const apiRequest = (url) => {
 	let u = apiURL;
 	if (url) u += "/" + url;
 	let req = new Request(u);
@@ -32,7 +32,7 @@ function apiRequest(url) {
 	return req;
 }
 
-async function downloadGist(gistID) {
+const downloadGist = async (gistID) => {
 	// Get the data in the Gist
 	let req = apiRequest(gistID);
 	let res = await req.loadJSON();
@@ -117,6 +117,7 @@ async function downloadGist(gistID) {
 	}
 }
 
-module.exports = {downloadGist, gistID}
-
-await downloadGist(gistID);
+module.exports = {
+    downloadGist: downloadGist,
+    gistID: gistID,
+}
