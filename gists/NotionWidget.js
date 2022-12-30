@@ -4,195 +4,64 @@
 
 const { NOTION_KEY, NOTION_DATABASE_ID } = importModule('/env/config.js');
 
-const debug = true 
+const downloadNotionWidget = async () => {
+    const gistID = "c15ecdc2826d105c04f93aa05facc136";
 
-const updateSelf = async () => {
-    // run KeepGistsUpdated.js to update the script
-    const keepGistsUpdated = importModule('KeepGistsUpdatedModule.js');
-    await keepGistsUpdated.downloadGist(keepGistsUpdated.gistID);
-}
+    let apiURL = "https://api.github.com/gists";
 
-const createNewPage = async () => {
-    let req = new Request(`https://api.notion.com/v1/pages`);
-    req.method = "POST";
-    req.headers = {
-        Authorization: `Bearer ${NOTION_KEY}`,
-        "Content-Type": "application/json",
-        "Notion-Version": "2022-02-22",
-    }
-    req.body = JSON.stringify({
-        parent: {
-            database_id: NOTION_DATABASE_ID,
-        },
-        properties: {
-            "Task name": {
-                title: [
-                    {
-                        text: {
-                            content: "Hello"
-                        }
-                    }
-                ]
-            }
-        },
-    })
-    let data = await req.loadJSON();
-    return data.url;
-};
-
-const fetchPages = async () => {
-    let baseURI = "https://api.notion.com/v1/databases/";
-    let queryURI = baseURI + NOTION_DATABASE_ID + "/query";
-    let req = new Request(queryURI);
-    req.method = "POST";
-    req.headers = {
-        Authorization: `Bearer ${NOTION_KEY}`,
-        "Content-Type": "application/json",
-        "Notion-Version": "2022-02-22",
-    };
-    req.body = JSON.stringify({
-        page_size: 4,
-        // sort by created time and only show uncompleted tasks
-        filter: {
-            property: "Status",
-            status: {
-                does_not_equal: "Done",
-            },
-        },
-        sorts: [
-            {
-                timestamp: "created_time",
-                direction: "descending",
-            },
-        ],
-    });
-    let data = await req.loadJSON();
-    let results = data.results;
-    return results;
-};
-
-const createWidget = async () => {
-
-    let pages = await fetchPages();
-    let messages = pages.map((page) => {
-        return page.properties['Task name'].title[0].plain_text;
-    });
-    let urls = pages.map((page) => {
-        return page.url;
-    });
-
-    // MAIN WIDGET
-
-    const widget = new ListWidget()
-    //widget.setPadding(0, 0, 0, 0)
-    widget.url = "https://www.notion.so/" + NOTION_DATABASE_ID
-
-    // ROW
-
-    let row = widget.addStack()
-    row.layoutHorizontally()
-    row.setPadding(5, 15, 5, 15)
-
-    // LEFT COLUMN
-
-    let left_column = row.addStack()
-    left_column.layoutVertically()
-
-    // add My Tasks header
-    let header = left_column.addStack()
-    let headerText = header.addText("My Tasks")
-    headerText.font = Font.boldSystemFont(18)
-    headerText.textColor = Color.white()
-
-    left_column.addSpacer(75)
-
-    // add plus button
-    let plus = left_column.addStack()
-    plus.bottomAlignContent()
-    let plusSymbol = SFSymbol.named("doc.badge.plus")
-    let plusImage = plus.addImage(plusSymbol.image)
-    plusImage.centerAlignImage()
-    plusImage.imageSize = new Size(40, 40)
-    plusImage.tintColor = Color.white()
-    // set the url to a returned request to make a new page in the database
-    // TODO: currently this creates a new page every time the widget is refreshed
-    //plusImage.url = await createNewPage();
-
-    // END LEFT COLUMN 
-
-    row.addSpacer(16)
-
-    // RIGHT COLUMN
-
-    let right_column = row.addStack()
-    right_column.layoutVertically()
-    right_column.setPadding(6, 0, 0, 0)
-
-    // add tasks 
-    let tasks = []
-    for (let i = 0; i < messages.length; i++) {
-        // set message to first 30 characters, add ellipsis if longer
-        let message = messages[i].length > 26 ? messages[i].substring(0, 26) + "..." : messages[i]
-        let url = urls[i]
-
-        let task = right_column.addStack()
-        tasks.push(task)
-        let text = task.addText(message)
-        text.url = url
-        text.font = Font.systemFont(14)
-        text.lineLimit = 1
-        text.textColor = Color.white()
-
-        if (i < messages.length - 1) {
-            right_column.addSpacer(16)
-        }
-
+    // prefer saving to iCloud, but if it wasn't enabled, fall back to local
+    let fm;
+    try {
+        fm = FileManager.iCloud();
+    } catch (ex) {
+        fm = FileManager.local();
     }
 
-    // END RIGHT COLUMN
-
-    row.addSpacer()
-
-    // END ROW
-
-    stacks = [
-        row, left_column, header, plus,
-        right_column, ...tasks
-    ]
-
-    if (debug) {
-        stacks.forEach((stack) => {
-            stack.borderWidth = 1
-            stack.borderColor = Color.white()
-        })
+    const apiRequest = (url) => {
+        let u = apiURL;
+        if (url) u += "/" + url;
+        let req = new Request(u);
+        return req;
     }
 
+    // Get the data in the Gist
+    let req = apiRequest(gistID);
+    let res = await req.loadJSON();
+    
+    let files = Object.values(res.files);
 
-    return widget
+    // Get the file named "NotionWidget.js"
+    let file = files.find(f => f.filename == "NotionWidget.js");
+
+    let contents = await file.content;
+    let path = fm.joinPath(fm.documentsDirectory(), file.filename);
+    if (file.truncated) {
+        contents = await new Request(file.raw_url).loadString();
+    }
+
+    console.log(contents);
+    console.log(path);
+
+    fm.writeString(path, contents);
+
 }
 
 async function main() {
 
-    // update if the time is 0:00, 6:00, 12:00, or 18:00
-    // this is to avoid hitting the GitHub API rate limit
-    // or if the script is run manually
-    let now = new Date();
-    let hour = now.getHours();
-    let minute = now.getMinutes();
+    let debug = true;
 
-    if (hour % 6 == 0 && minute == 0 || config.runsInApp) {
-        await updateSelf();
+    // if NotionWidget.js doesn't exist, or debug is on, download it
+    // also download it if the file is older than 1 day
+    let fm = FileManager.iCloud();
+    let path = fm.joinPath(fm.documentsDirectory(), "NotionWidget.js");
+    if (!fm.fileExists(path) || debug || (Date.now() - fm.modificationDate(path)) > 86400000) {
+        await downloadNotionWidget();
     }
 
-    let widget = await createWidget();
+    // run NotionWidget.js
+    const notionWidget = importModule('NotionWidget.js');
+    await notionWidget.main(debug);
 
-    if (config.runsInWidget) {
-        Script.setWidget(widget)
-    } else {
-        widget.presentMedium()
-    }
 }
 
-if (config.runsInWidget) {
-    await main();
-}
+await main();
