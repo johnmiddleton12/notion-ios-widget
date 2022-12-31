@@ -6,6 +6,9 @@ I used to use Google Tasks to keep track of things, but now use Notion - however
 
 It displays the 4 most recently added items in a database, along with providing a button to add a new item in that database. Each item links to its corresponding page in the Notion database.
 
+![Google Tasks Widget Screenshot](/images/GoogleTasksWidgetScreenshot.png "Google Tasks Widget Screenshot")
+![Notion Widget Screenshot](/images/WidgetScreenshot.png "Notion Widget Screenshot")
+
 ## Usage
 
 ### Scriptable Setup
