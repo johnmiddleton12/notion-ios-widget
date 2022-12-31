@@ -48,6 +48,5 @@ module.exports = {NOTION_KEY, NOTION_DATABASE_ID}
 ## To-Do
 
 - Add local storage for offline usage
-- Add preview 
 - Prettify 
 - Add small / xl widget sizes
