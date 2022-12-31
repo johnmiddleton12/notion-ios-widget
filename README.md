@@ -17,8 +17,7 @@ First we will setup the widget script and allow it be easily updated.
 3. Go to the Raw view of "NotionWidget.js"
 4. Select All and Copy
 5. Navigate to Scriptable, create a new script, and paste the code from "NotionWidget.js"
-6. Run that Script
-- This will give you the NotionWidget script, which will automatically update periodically 
+6. This will give you the NotionWidget script, which will automatically download the latest version every day when put in a Widget. Additionally, running the NotionWidget script in the Scriptable App will manually download the latest version.
 ### Notion API Setup
 Next we need to set up the Notion API key and Database IDs
 
@@ -42,5 +41,5 @@ module.exports = {NOTION_KEY, NOTION_DATABASE_ID}
 
 - Add local storage for offline usage
 - Add preview 
-- Fix new page button - use url scheme
 - Prettify 
+- Add small / xl widget sizes
