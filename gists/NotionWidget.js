@@ -19,21 +19,27 @@ const downloadNotionWidget = async () => {
     let url = apiURL + "/" + gistID;
     let req = new Request(url);
     let res = await req.loadJSON();
-    
+
     let files = Object.values(res.files);
 
-    // Get the file named "NotionWidget.js"
-    let file = files.find(f => f.filename == "NotionWidgetModule.js");
-
-    // Get the contents of the file
-    let contents = await file.content;
-    let path = fm.joinPath(fm.documentsDirectory(), file.filename);
-    if (file.truncated) {
-        contents = await new Request(file.raw_url).loadString();
+    // for each file in the gist
+    for (let i = 0; i < files.length; i++) {
+        let file = files[i];
+        // if it's a file we want
+        if (file.filename == "NotionWidgetModule.js" || file.filename == "CreateNewNotionPage.js") {
+            // get the path
+            let path = fm.joinPath(fm.documentsDirectory(), file.filename);
+            // and the contents
+            let content = await file.content;
+            if (file.truncated) {
+                content = await new Request(file.raw_url).loadString();
+            }
+            // and write it
+            console.log("Writing " + file.filename);
+            fm.writeString(path, content);
+        }
     }
 
-    // Save the file 
-    fm.writeString(path, contents);
 }
 
 async function main() {
@@ -42,20 +48,24 @@ async function main() {
     // also download it if the file is older than 1 day
     let fm = FileManager.iCloud();
     let path = fm.joinPath(fm.documentsDirectory(), "NotionWidgetModule.js");
+    let path2 = fm.joinPath(fm.documentsDirectory(), "CreateNewNotionPage.js");
 
     try {
-        if (!fm.fileExists(path) || config.runsInApp || (Date.now() - fm.modificationDate(path)) > 86400000) {
-            console.log("Downloading NotionWidgetModule.js");
+        if (!fm.fileExists(path) || (Date.now() - fm.modificationDate(path)) > 86400000 ||
+            !fm.fileExists(path2) || (Date.now() - fm.modificationDate(path2)) > 86400000 ||
+            config.runsInApp) {
+            console.log("Downloading Dependencies");
             await downloadNotionWidget();
         }
     } catch (ex) {
-        
+
         console.log("Error downloading NotionWidgetModule.js");
 
-        if (!fm.fileExists(path)) {
+        if (!fm.fileExists(path) || !fm.fileExists(path2)) {
             // display error message in widget
             let widget = new ListWidget();
-            widget.addText("Error: NotionWidgetModule.js not found");
+            widget.setPadding(10, 10, 10, 10);
+            widget.addText("Error: Missing Dependencies");
             Script.setWidget(widget);
             Script.complete();
         } 

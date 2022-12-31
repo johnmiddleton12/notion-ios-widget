@@ -4,34 +4,6 @@
 
 const { NOTION_KEY, NOTION_DATABASE_ID } = importModule('/env/config.js');
 
-const createNewPage = async () => {
-    let req = new Request(`https://api.notion.com/v1/pages`);
-    req.method = "POST";
-    req.headers = {
-        Authorization: `Bearer ${NOTION_KEY}`,
-        "Content-Type": "application/json",
-        "Notion-Version": "2022-02-22",
-    }
-    req.body = JSON.stringify({
-        parent: {
-            database_id: NOTION_DATABASE_ID,
-        },
-        properties: {
-            "Task name": {
-                title: [
-                    {
-                        text: {
-                            content: "Hello"
-                        }
-                    }
-                ]
-            }
-        },
-    })
-    let data = await req.loadJSON();
-    return data.url;
-};
-
 const fetchPages = async () => {
     let baseURI = "https://api.notion.com/v1/databases/";
     let queryURI = baseURI + NOTION_DATABASE_ID + "/query";
@@ -76,12 +48,15 @@ const createWidget = async (debug) => {
     // MAIN WIDGET
 
     const widget = new ListWidget()
+    widget.backgroundColor = new Color("#1f2024")
+    widget.setPadding(0, 0, 0, 0)
+    widget.url = "https://www.notion.so/" + NOTION_DATABASE_ID
 
     // ROW
 
     let row = widget.addStack()
     row.layoutHorizontally()
-    row.setPadding(5, 10, 5, 15)
+    row.setPadding(14, 0 + 20, 10, 15 + 20)
     row.url = "https://www.notion.so/" + NOTION_DATABASE_ID
 
     // LEFT COLUMN
@@ -92,32 +67,31 @@ const createWidget = async (debug) => {
     // add My Tasks header
     let header = left_column.addStack()
     let headerText = header.addText("My Tasks")
-    headerText.font = Font.boldSystemFont(18)
+    headerText.font = Font.systemFont(18)
     headerText.textColor = Color.white()
 
-    left_column.addSpacer(75)
+    left_column.addSpacer(60)
 
     // add plus button
     let plus = left_column.addStack()
     plus.bottomAlignContent()
-    let plusSymbol = SFSymbol.named("doc.badge.plus")
+    let plusSymbol = SFSymbol.named("square.and.pencil")
     let plusImage = plus.addImage(plusSymbol.image)
     plusImage.centerAlignImage()
     plusImage.imageSize = new Size(40, 40)
     plusImage.tintColor = Color.white()
-    // set the url to a returned request to make a new page in the database
-    // TODO: currently this creates a new page every time the widget is refreshed
-    //plusImage.url = await createNewPage();
+    // set the url to run the CreateNewNotionPage.js script
+    plusImage.url = "scriptable:///run/CreateNewNotionPage"
 
     // END LEFT COLUMN 
 
-    row.addSpacer(16)
+    row.addSpacer(21)
 
     // RIGHT COLUMN
 
     let right_column = row.addStack()
     right_column.layoutVertically()
-    right_column.setPadding(6, 0, 0, 0)
+    right_column.setPadding(3, 0, 0, 10)
 
     // add tasks 
     let tasks = []
@@ -147,7 +121,9 @@ const createWidget = async (debug) => {
     // END ROW
 
     stacks = [
-        row, left_column, header, plus,
+        widget,
+        row,
+        left_column, header, plus,
         right_column, ...tasks
     ]
 
@@ -163,12 +139,22 @@ const createWidget = async (debug) => {
 
 async function main() {
     
-    const debug = false 
+    const debug = false
 
     let widget = await createWidget(debug);
 
+    // only present the widget in a medium size
     if (config.runsInWidget) {
-        Script.setWidget(widget)
+        if (config.widgetFamily === "medium") {
+            Script.setWidget(widget)
+        } else {
+            let smallWidget = new ListWidget()
+            smallWidget.setPadding(15, 15, 15, 15)
+            let text = smallWidget.addText("Please use the medium widget size.")
+            text.font = Font.systemFont(14)
+            text.textColor = Color.white()
+            Script.setWidget(smallWidget)
+        }
     } else {
         widget.presentMedium()
     }
